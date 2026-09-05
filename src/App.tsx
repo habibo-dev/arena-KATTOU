@@ -30,7 +30,7 @@ const SERVICES = [
 ]
 
 export const App: React.FC = () => {
-  const [section, setSection] = useState<'home' | 'appointment' | 'queue' 'staff'>('home')
+  const [section, setSection] = useState<'home' | 'appointment' | 'queue' | 'staff'>('home')
   const [language, setLanguage] = useState<'ar' | 'fr' | 'en'>('ar')
   const [selectedService, setSelectedService] = useState<string>('')
   const [selectedDate, setSelectedDate] = useState<string>('')
@@ -45,7 +45,7 @@ export const App: React.FC = () => {
   const [notifications, setNotifications] = useState<Array<{ id: number; message: string }>>([])
 
   const callNext = () => {
-    // Simple queue advance logic
+    // Queue advance logic
     const newPatientsBefore = Math.max(0, queueState.patientsBefore - 1)
     const newEstimatedWait = newPatientsBefore * 20 + (newPatientsBefore > 0 ? 15 : 0)
     setQueueState({
@@ -85,11 +85,13 @@ export const App: React.FC = () => {
     ])
   }
 
-  const toggleDemoMode = () => setShowDemoControls((prev) => !prev)
+  const toggleSection = (newSection: string) => setSection(newSection)
 
   return React.createElement(
     'div',
-    { className: 'min-h-screen bg-gray-50 text-navy' },
+    {
+      className: 'min-h-screen bg-navy-50 text-navy',
+    },
     // Language switcher
     React.createElement(LanguageSwitcher, {
       language,
@@ -118,7 +120,7 @@ export const App: React.FC = () => {
             }, 'رعاية أسنان تبدأ من وقتك.'),
             React.createElement('p', {
               className: 'text-gray-600 text-lg mb-6',
-            }, 'احجز موعدك، وتتبع دورك بسهولة، واعرف متى يحين وقتك.'),
+            }, 'احجز موعدك بسهولة، وتتبع دورك، واعرف الوقت المتوقع لزيارتك.'),
             React.createElement(
               'div',
               { className: 'gap-4' },
@@ -128,15 +130,15 @@ export const App: React.FC = () => {
                   className: 'btn btn-primary px-6 py-3 rounded-xl',
                   onClick: () => setSection('appointment'),
                 },
-                'احجز موعدًا')
+                'احجز موعدك')
               ),
               React.createElement(
                 'button',
                 {
                   className: 'btn btn-outline px-6 py-3 rounded-xl',
-                  onClick: () => setSection('queue'),
+                  onClick: () => setSection('services'),
                 },
-                'عرض الملف')
+                'اكتشف خدماتنا')
               )
           ),
           React.createElement(
@@ -163,7 +165,7 @@ export const App: React.FC = () => {
         React.createElement(
           'h2',
           { className: 'text-3xl font-bold text-navy text-center mb-8' },
-          'Nos services'
+          'خدماتنا'
         ),
         React.createElement(
           'div',
@@ -185,7 +187,7 @@ export const App: React.FC = () => {
       'main',
       { className: 'py-8' },
       React.createElement(Header, {
-        title: 'Prendre rendez-vous',
+        title: 'احجز موعدك',
         subtitle: 'Sélectionnez votre service et votre créneau',
         showBack: true,
       }),
@@ -219,7 +221,7 @@ export const App: React.FC = () => {
       'main',
       { className: 'py-8' },
       React.createElement(Header, {
-        title: 'Votre file d\'attente',
+        title: 'دورك في العيادة',
         subtitle: 'Suivez votre position en temps réel',
         showBack: true,
       }),
@@ -236,7 +238,7 @@ export const App: React.FC = () => {
         React.createElement(
           'h3',
           { className: 'text-sm text-gray-500 mb-4' },
-          'Mode démonstration'
+          'تنبيهات الملف'
         ),
         React.createElement(
           'div',
@@ -247,7 +249,7 @@ export const App: React.FC = () => {
               onClick: callNext,
               className: 'btn btn-sm btn-outline',
             },
-            'Appeler suivant')
+            'التالي')
           ),
           React.createElement(
             'button',
@@ -255,7 +257,7 @@ export const App: React.FC = () => {
               onClick: addDelay,
               className: 'btn btn-sm btn-outline',
             },
-            'Retard 20 min')
+            'تأخير 20 min')
           )
         )
       ),
@@ -264,8 +266,8 @@ export const App: React.FC = () => {
       'main',
       { className: 'py-8' },
       React.createElement(Header, {
-        title: 'Tableau de bord',
-        subtitle: "Tableau de bord du Dr M. KATTOU",
+        title: 'لوحة التحكم',
+        subtitle: "لوحة تحكم docteur M. KATTOU",
         showBack: true,
       }),
       React.createElement(ReceptionDashboard, {
@@ -297,7 +299,6 @@ export const App: React.FC = () => {
         },
       })
     ),
-    // Demo mode overlay removed for production
     Footer
   )
 }
