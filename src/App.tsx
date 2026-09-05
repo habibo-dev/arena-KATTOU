@@ -29,68 +29,30 @@ const SERVICES = [
   { id: 'petite-chirurgie', name: 'Petite Chirurgie', arName: 'Petite Chirurgie', frName: 'Petite Chirurgie' },
 ]
 
-const demoQueue = {
-  current: '#18',
-  patientsBefore: 3,
-  estimatedWait: 55,
-  endRange: '10:50 – 11:15',
-  nextPatients: ['#19', '#20', '#21'],
-}
-
-const demoPatientsNames: Record<string, string> = {
-  '#18': 'Mohamed',
-  '#19': 'Sara',
-  '#20': 'Ahmed',
-  '#21': 'Ali',
-}
-
-const getPatientName = (id: string): string => {
-  return demoPatientsNames[id] || 'Patient'
-}
-
 export const App: React.FC = () => {
-  const [section, setSection] = useState<'public' | 'booking' | 'queue' | 'staff'>('public')
+  const [section, setSection] = useState<'home' | 'appointment' | 'queue' 'staff'>('home')
   const [language, setLanguage] = useState<'ar' | 'fr' | 'en'>('ar')
   const [selectedService, setSelectedService] = useState<string>('')
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [patientName, setPatientName] = useState<string>('')
   const [patientPhone, setPatientPhone] = useState<string>('')
-  const [currentPatient, setCurrentPatient] = useState({ id: '#18', name: 'Mohamed' })
+  const [currentPatient, setCurrentPatient] = useState({ id: '', name: '' })
   const [queueState, setQueueState] = useState({
-    patientsBefore: 3,
-    estimatedWait: 55,
-    endRange: '10:50 – 11:15',
+    patientsBefore: 0,
+    estimatedWait: 0,
+    endRange: '',
   })
   const [notifications, setNotifications] = useState<Array<{ id: number; message: string }>>([])
-  const [showDemoControls, setShowDemoControls] = useState(false)
 
   const callNext = () => {
-    // Find current patient index in the queue
-    const currentIdx = demoQueue.nextPatients.indexOf(currentPatient.id)
-    let nextIdx
-
-    if (currentIdx >= 0 && currentIdx < demoQueue.nextPatients.length - 1) {
-      nextIdx = currentIdx + 1
-    } else {
-      nextIdx = 0
-    }
-
-    const newCurrentId = demoQueue.nextPatients[nextIdx] || '#21'
-    const newCurrentName = getPatientName(newCurrentId)
-
-    setCurrentPatient({ id: newCurrentId, name: newCurrentName })
-
-    // Update patients before count
+    // Simple queue advance logic
     const newPatientsBefore = Math.max(0, queueState.patientsBefore - 1)
     const newEstimatedWait = newPatientsBefore * 20 + (newPatientsBefore > 0 ? 15 : 0)
-
     setQueueState({
       patientsBefore: newPatientsBefore,
       estimatedWait: newEstimatedWait,
       endRange: '10:50 – 11:15',
     })
-
-    // Add notification
     setNotifications((prev) => [
       ...prev,
       {
@@ -105,7 +67,6 @@ export const App: React.FC = () => {
       ...prev,
       estimatedWait: prev.estimatedWait + 20,
     }))
-
     setNotifications((prev) => [
       ...prev,
       { id: notifications.length + 1, message: 'Le médecin est en retard de 20 min.' },
@@ -118,30 +79,24 @@ export const App: React.FC = () => {
       ...prev,
       estimatedWait: prev.estimatedWait + 10,
     }))
-
     setNotifications((prev) => [
       ...prev,
       { id: notifications.length + 1, message: 'Nouvelle urgence ajoutée à la file.' },
     ])
   }
 
-  const notificationsClose = (id: number) =>
-    setNotifications((prev) => prev.filter((n) => n.id !== id))
-
   const toggleDemoMode = () => setShowDemoControls((prev) => !prev)
 
   return React.createElement(
     'div',
-    {
-      className: 'min-h-screen bg-gray-50',
-    },
-    // Language switcher at top
+    { className: 'min-h-screen bg-gray-50 text-navy' },
+    // Language switcher
     React.createElement(LanguageSwitcher, {
       language,
       onSelect: setLanguage,
     }),
-    // Main content based on section
-    section === 'public' && React.createElement(
+    // Header/hero section based on section
+    section === 'home' && React.createElement(
       'main',
       { className: 'py-8' },
       React.createElement(Header, {
@@ -171,7 +126,7 @@ export const App: React.FC = () => {
                 'button',
                 {
                   className: 'btn btn-primary px-6 py-3 rounded-xl',
-                  onClick: () => setSection('booking'),
+                  onClick: () => setSection('appointment'),
                 },
                 'احجز موعدًا')
               ),
@@ -181,7 +136,7 @@ export const App: React.FC = () => {
                   className: 'btn btn-outline px-6 py-3 rounded-xl',
                   onClick: () => setSection('queue'),
                 },
-                'Voir la file d\'attente')
+                'عرض الملف')
               )
           ),
           React.createElement(
@@ -226,7 +181,7 @@ export const App: React.FC = () => {
         )
       )
     ),
-    section === 'booking' && React.createElement(
+    section === 'appointment' && React.createElement(
       'main',
       { className: 'py-8' },
       React.createElement(Header, {
@@ -277,13 +232,11 @@ export const App: React.FC = () => {
       React.createElement(RemoteWaiting, null),
       React.createElement(
         'div',
-        {
-          className: 'mt-8 pt-8 border-t border-border',
-        },
+        { className: 'mt-8 pt-8 border-t border-border' },
         React.createElement(
           'h3',
           { className: 'text-sm text-gray-500 mb-4' },
-          'Mode démo'
+          'Mode démonstration'
         ),
         React.createElement(
           'div',
@@ -318,10 +271,10 @@ export const App: React.FC = () => {
       React.createElement(ReceptionDashboard, {
         currentPatient: currentPatient,
         queue: [
-          { id: '#18', name: 'Mohamed', status: 'in-consultation' },
-          { id: '#19', name: 'Sara', status: 'waiting' },
-          { id: '#20', name: 'Ahmed', status: 'waiting' },
-          { id: '#21', name: 'Ali', status: 'waiting' },
+          { id: '#18', name: 'Mohamed', status: 'en-consultation' },
+          { id: '#19', name: 'Sara', status: 'en-attente' },
+          { id: '#20', name: 'Ahmed', status: 'en-attente' },
+          { id: '#21', name: 'Ali', status: 'en-attente' },
         ],
         onCallNext: callNext,
         onComplete: (id) => {
@@ -344,56 +297,7 @@ export const App: React.FC = () => {
         },
       })
     ),
-    // Demo mode overlay
-    showDemoControls && React.createElement(
-      'div',
-      {
-        className: 'fixed inset-0 bg-black/50 backdrop-blur-zxl z-50 flex items-center justify-center',
-      },
-      React.createElement(
-        'div',
-        { className: 'bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center' },
-        React.createElement(
-          'h2',
-          { className: 'text-2xl font-bold text-navy mb-6' },
-          'Mode démo activé'
-        ),
-        React.createElement(
-          'p',
-          { className: 'text-gray-600 mb-8' },
-          'Utilisez les boutons ci-dessous pour simuler le flux de patients.'
-        ),
-        React.createElement(
-          'div',
-          { className: 'grid grid-cols-2 gap-4' },
-          React.createElement(
-            'button',
-            {
-              onClick: callNext,
-              className: 'btn btn-primary w-full',
-            },
-            'Appeler suivant')
-          ),
-          React.createElement(
-            'button',
-            {
-              onClick: addDelay,
-              className: 'btn btn-outline w-full',
-            },
-            'Retard 20 min')
-          )
-        ),
-        React.createElement(
-          'button',
-          {
-            onClick: toggleDemoMode,
-            className: 'mt-6 btn btn-outline w-full',
-          },
-            'Fermer'
-          )
-        )
-      )
-    ),
+    // Demo mode overlay removed for production
     Footer
   )
 }
